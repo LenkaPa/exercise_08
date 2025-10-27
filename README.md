@@ -21,6 +21,22 @@ reversals.
 > and ending at length of the permutation - 1. The comparison ends when the value in permutation is not the same as 
 > the tested value or when the tested value is equal to the length of the permutation - 1.
 
+FindSorted <- function(perm) {
+  # Iterate through permutation and check expected sorted positions
+  for (i in seq_along(perm)) {
+    if (perm[i] != (i - 1)) {
+      return(i)  # Return the index where mismatch occurs
+    }
+  }
+  
+  # If everything matched (already sorted), return length + 1
+  return(length(perm) + 1)
+}
+
+perm <- c(0, 1, 2, 3, 6, 7, 4, 5, 8)
+FindSorted(perm)
+
+
 ### Task 2
 * In R, create a function `IndicateAscending()` to mark ascending and descending parts of a permutation.
 
@@ -35,6 +51,29 @@ reversals.
 > and last values to `1`. The ascending parts of the permutation vector will be marked with `1` values in the indication
 > vector. Create a loop that iterates through the permutation and if two values next to each other are ascending, 
 > i.e. the second is the first + 1, then the indication vector is set to `1` at the given indexes.
+
+IndicateAscending <- function(perm) {
+  n <- length(perm)
+  
+  # Start with all zeros
+  indication <- rep(0, n)
+  
+  # First and last values always marked as 1 (according to hint)
+  indication[1] <- 1
+  indication[n] <- 1
+  
+  # Loop to mark ascending parts
+  for (i in 1:(n - 1)) {
+    if (perm[i + 1] == perm[i] + 1) {
+      indication[i] <- 1
+      indication[i + 1] <- 1
+    }
+  }
+  return(indication)
+}
+
+perm <- c(0, 4, 5, 3, 2, 1, 6, 7, 8)
+IndicateAscending(perm)
 
 
 ### Task 3
@@ -54,6 +93,38 @@ reversals.
 >
 > The loop ends when the permutation is sorted. Watch out for collision situations i.e. no parts marked as descending 
 > or there is a single value marked as descending in front of the sorted part of the permutation.
+
+BreakpointSort <- function(perm) {
+  # Add marginal values (-1 at start, max+1 at end)
+  perm <- c(-1, perm, length(perm))
+  
+  repeat {
+    start <- FindSorted(perm)
+    if (start > length(perm) - 1) break
+    
+    indication <- IndicateAscending(perm)
+    
+    # Find descending positions after 'start'
+    desc_positions <- which(indication == 0 & seq_along(indication) > start)
+    
+    # If no descending left → sorted
+    if (length(desc_positions) == 0) break
+    
+    # Get smallest descending value position
+    end <- desc_positions[which.min(perm[desc_positions])]
+    
+    # Reversal
+    perm[start:end] <- rev(perm[start:end])
+  }
+  
+  # Remove marginal values
+  perm[-c(1, length(perm))]
+}
+
+perm <- c(5, 1, 4, 3, 7, 8, 9, 2, 6)
+BreakpointSort(perm)
+
+
 
 
 <details>
@@ -105,3 +176,5 @@ Create a new commit and send new changes to your remote repository.
     ```
 
 </details>
+
+
